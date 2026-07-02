@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MOVIE_QUOTES } from "../lib/quotes";
 
-const ROTATE_MS = 11_000;
+const ROTATE_MS = 30 * 60_000; // rotate at most once every 30 minutes
 const FADE_MS = 400;
 
 /**
