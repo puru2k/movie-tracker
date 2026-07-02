@@ -18,11 +18,8 @@ import {
   SearchIcon,
   PlusIcon,
   CloseIcon,
-  LayoutGridIcon,
-  ListIcon,
   MenuIcon,
 } from "./components/Icons";
-import type { GridSize } from "./types";
 import { MOVIE_QUOTES } from "./lib/quotes";
 
 const EMPTY_COPY: Record<string, string> = {
@@ -51,10 +48,9 @@ export default function App() {
   const openSignIn = useAppStore((s) => s.openSignIn);
   const layout = useAppStore((s) => s.layout);
   const gridSize = useAppStore((s) => s.gridSize);
-  const setLayout = useAppStore((s) => s.setLayout);
-  const setGridSize = useAppStore((s) => s.setGridSize);
 
   const [filter, setFilter] = useState("");
+  const [guestBannerHidden, setGuestBannerHidden] = useState(false);
   const isLibrary = view === "library";
   const isInsights = view === "insights";
   const isDiscover = view === "discover";
@@ -106,14 +102,22 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden h-[100dvh]">
-      {cloud && guest && (
-        <div className="flex shrink-0 items-center justify-center gap-2 border-b border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-center text-[11px] text-white/60">
+      {cloud && guest && !guestBannerHidden && (
+        <div className="relative flex shrink-0 items-center justify-center gap-2 border-b border-white/[0.08] bg-white/[0.03] px-10 py-1.5 text-center text-[11px] text-white/60">
           <span>Browsing as a guest — your library is saved on this device.</span>
           <button
             onClick={openSignIn}
             className="rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-medium text-white transition hover:bg-brand-strong active:scale-95"
           >
             Sign in to sync
+          </button>
+          <button
+            onClick={() => setGuestBannerHidden(true)}
+            aria-label="Dismiss"
+            title="Dismiss"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-600 transition hover:bg-white/10 hover:text-white"
+          >
+            <CloseIcon width={13} height={13} />
           </button>
         </div>
       )}
@@ -210,43 +214,6 @@ export default function App() {
                 </button>
               )}
             </div>
-
-            <div className="hidden items-center rounded-lg bg-white/[0.06] p-0.5 ring-1 ring-white/[0.08] sm:inline-flex">
-              <button
-                onClick={() => setLayout("grid")}
-                title="Grid view"
-                aria-label="Grid view"
-                className={`flex h-7 w-7 items-center justify-center rounded-md transition ${
-                  layout === "grid" ? "bg-white/15 text-white" : "text-ink-600 hover:text-white"
-                }`}
-              >
-                <LayoutGridIcon width={15} height={15} />
-              </button>
-              <button
-                onClick={() => setLayout("list")}
-                title="List view"
-                aria-label="List view"
-                className={`flex h-7 w-7 items-center justify-center rounded-md transition ${
-                  layout === "list" ? "bg-white/15 text-white" : "text-ink-600 hover:text-white"
-                }`}
-              >
-                <ListIcon width={15} height={15} />
-              </button>
-            </div>
-
-            {layout === "grid" && (
-              <select
-                value={gridSize}
-                onChange={(e) => setGridSize(e.target.value as GridSize)}
-                title="Grid density"
-                aria-label="Grid density"
-                className="hidden h-8 rounded-lg bg-white/[0.06] px-2 text-[12px] text-white/85 outline-none ring-1 ring-white/[0.08] transition hover:bg-white/[0.09] focus:ring-2 focus:ring-brand sm:block [color-scheme:dark]"
-              >
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            )}
 
             <button
               onClick={openSearch}
