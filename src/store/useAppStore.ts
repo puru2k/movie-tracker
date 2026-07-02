@@ -20,6 +20,10 @@ import {
 
 export type AppView = "library" | "insights" | "discover" | "recommend";
 
+/** True on phone-sized viewports (matches the Tailwind `md` breakpoint). */
+const isMobile = (): boolean =>
+  typeof window !== "undefined" && window.innerWidth < 768;
+
 export interface PersonRef {
   name: string;
   role: "director" | "cast";
@@ -144,7 +148,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   selectedId: null,
   person: null,
   navStack: [],
-  sidebarCollapsed: false,
+  // Collapsed by default on small screens so the drawer doesn't cover content.
+  sidebarCollapsed: typeof window !== "undefined" && window.innerWidth < 768,
   advancedOpen: false,
   advancedGenreId: null,
 
@@ -288,11 +293,18 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   openSignIn: () => set({ needsAuth: true, authError: null }),
 
-  setView: (view) => set({ view }),
-  setActiveTab: (tab) => set({ activeTab: tab, view: "library" }),
+  setView: (view) =>
+    set((s) => ({ view, sidebarCollapsed: isMobile() ? true : s.sidebarCollapsed })),
+  setActiveTab: (tab) =>
+    set((s) => ({
+      activeTab: tab,
+      view: "library",
+      sidebarCollapsed: isMobile() ? true : s.sidebarCollapsed,
+    })),
   openSearch: () => set({ searchOpen: true }),
   closeSearch: () => set({ searchOpen: false }),
-  openSettings: () => set({ settingsOpen: true }),
+  openSettings: () =>
+    set((s) => ({ settingsOpen: true, sidebarCollapsed: isMobile() ? true : s.sidebarCollapsed })),
   closeSettings: () => set({ settingsOpen: false }),
   selectMovie: (id) =>
     set((s) => navPatch([...s.navStack, { kind: "movie", id }])),

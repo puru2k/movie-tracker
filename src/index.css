@@ -76,6 +76,18 @@ body {
     -webkit-user-drag: none;
     user-select: none;
   }
+
+  /* Touch/mobile ergonomics */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .overflow-y-auto,
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* ---- Design-system components ------------------------------------------ */
@@ -187,6 +199,23 @@ body {
   }
   .group:hover .poster img {
     transform: scale(1.04);
+  }
+
+  /* Quick-add overlays: reveal on hover for mouse users… */
+  .hover-actions {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .group:hover .hover-actions,
+  .group:focus-within .hover-actions {
+    opacity: 1;
+  }
+}
+
+/* …but always visible on touch devices, which have no hover. */
+@media (hover: none), (pointer: coarse) {
+  .hover-actions {
+    opacity: 1 !important;
   }
 }
 

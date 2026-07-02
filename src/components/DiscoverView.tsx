@@ -67,7 +67,7 @@ function DiscoverCard({
             <CheckIcon width={11} height={11} /> In library
           </div>
         ) : (
-          <div className="absolute bottom-1.5 right-1.5 flex flex-col gap-1.5 opacity-0 transition group-hover:opacity-100">
+          <div className="hover-actions absolute bottom-1.5 right-1.5 flex flex-col gap-1.5">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -166,15 +166,18 @@ export function DiscoverView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="order-2 flex flex-wrap gap-1.5 sm:order-1">
           {GENRE_ROWS.map((g) => (
             <button key={g.id} onClick={() => openAdvanced(g.id)} className="chip">
               {g.name}
             </button>
           ))}
         </div>
-        <button onClick={() => openAdvanced()} className="btn btn-secondary btn-sm shrink-0">
+        <button
+          onClick={() => openAdvanced()}
+          className="btn btn-secondary btn-sm order-1 shrink-0 self-start sm:order-2 sm:self-auto"
+        >
           <SearchIcon width={14} height={14} />
           Advanced search
         </button>

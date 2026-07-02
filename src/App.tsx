@@ -21,6 +21,7 @@ import {
   CloseIcon,
   LayoutGridIcon,
   ListIcon,
+  MenuIcon,
 } from "./components/Icons";
 import type { GridSize } from "./types";
 import { runPosterCache } from "./lib/posterCache";
@@ -122,7 +123,7 @@ export default function App() {
   if (cloud && needsAuth) return <AuthGate />;
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden">
+    <div className="flex h-screen w-screen flex-col overflow-hidden h-[100dvh]">
       {cloud && guest && (
         <div className="flex shrink-0 items-center justify-center gap-2 border-b border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-center text-[11px] text-white/60">
           <span>Browsing as a guest — your library is saved on this device.</span>
@@ -139,23 +140,38 @@ export default function App() {
           Library is saved in this browser only. Open the desktop app for full offline storage.
         </div>
       )}
-      <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+        {!sidebarCollapsed && (
+          <button
+            aria-label="Close menu"
+            onClick={toggleSidebar}
+            className="animate-overlay-in fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          />
+        )}
         <div
-          className={`shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out ${
-            sidebarCollapsed ? "w-0" : "w-56"
+          className={`fixed inset-y-0 left-0 z-50 shrink-0 transform overflow-hidden shadow-2xl shadow-black/50 transition-transform duration-300 ease-in-out md:static md:z-auto md:transform-none md:shadow-none md:transition-[width] ${
+            sidebarCollapsed ? "-translate-x-full md:w-0" : "translate-x-0 md:w-56"
           }`}
         >
           <Sidebar />
         </div>
 
         <main className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-6 py-3">
-          <div className="flex min-w-0 items-center gap-3">
+        <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-3 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+            <button
+              onClick={toggleSidebar}
+              title="Menu"
+              aria-label="Open menu"
+              className="icon-btn h-9 w-9 shrink-0 md:hidden"
+            >
+              <MenuIcon width={20} height={20} />
+            </button>
             {sidebarCollapsed && (
               <button
                 onClick={toggleSidebar}
                 title="Show sidebar"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-gradient-to-b from-brand to-brand-strong text-white shadow-sm transition hover:brightness-110"
+                className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-gradient-to-b from-brand to-brand-strong text-white shadow-sm transition hover:brightness-110 md:flex"
               >
                 <FilmIcon width={16} height={16} />
               </button>
@@ -200,7 +216,7 @@ export default function App() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Search your library"
-                className="w-56 rounded-lg bg-white/[0.06] py-1.5 pl-8 pr-7 text-[13px] text-white outline-none ring-1 ring-white/[0.08] transition placeholder:text-ink-600 focus:w-64 focus:bg-white/[0.09] focus:ring-2 focus:ring-brand"
+                className="w-36 rounded-lg bg-white/[0.06] py-1.5 pl-8 pr-7 text-[13px] text-white outline-none ring-1 ring-white/[0.08] transition placeholder:text-ink-600 focus:bg-white/[0.09] focus:ring-2 focus:ring-brand sm:w-56 sm:focus:w-64"
               />
               {filter && (
                 <button
@@ -213,7 +229,7 @@ export default function App() {
               )}
             </div>
 
-            <div className="inline-flex items-center rounded-lg bg-white/[0.06] p-0.5 ring-1 ring-white/[0.08]">
+            <div className="hidden items-center rounded-lg bg-white/[0.06] p-0.5 ring-1 ring-white/[0.08] sm:inline-flex">
               <button
                 onClick={() => setLayout("grid")}
                 title="Grid view"
@@ -242,7 +258,7 @@ export default function App() {
                 onChange={(e) => setGridSize(e.target.value as GridSize)}
                 title="Grid density"
                 aria-label="Grid density"
-                className="h-8 rounded-lg bg-white/[0.06] px-2 text-[12px] text-white/85 outline-none ring-1 ring-white/[0.08] transition hover:bg-white/[0.09] focus:ring-2 focus:ring-brand [color-scheme:dark]"
+                className="hidden h-8 rounded-lg bg-white/[0.06] px-2 text-[12px] text-white/85 outline-none ring-1 ring-white/[0.08] transition hover:bg-white/[0.09] focus:ring-2 focus:ring-brand sm:block [color-scheme:dark]"
               >
                 <option value="small">Small</option>
                 <option value="medium">Medium</option>
@@ -262,7 +278,7 @@ export default function App() {
           </div>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-8 py-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
           {loading ? (
             <div className="flex h-full items-center justify-center text-sm text-ink-600">
               Loading your library…

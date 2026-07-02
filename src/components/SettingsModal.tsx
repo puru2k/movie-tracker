@@ -110,7 +110,10 @@ export function SettingsModal() {
 
   return (
     <div className="overlay items-center justify-center" onMouseDown={close}>
-      <div className="modal max-w-lg p-6" onMouseDown={(e) => e.stopPropagation()}>
+      <div
+        className="modal max-h-[90vh] max-w-lg overflow-y-auto p-5 sm:p-6"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[15px] font-semibold text-white">Settings</h2>
           <button onClick={close} className="icon-btn p-1.5">

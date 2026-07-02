@@ -42,7 +42,7 @@ export function PosterAddCard({
             <CheckIcon width={10} height={10} /> In library
           </div>
         ) : (
-          <div className="absolute bottom-1.5 right-1.5 flex flex-col gap-1.5 opacity-0 transition group-hover:opacity-100">
+          <div className="hover-actions absolute bottom-1.5 right-1.5 flex flex-col gap-1.5">
             <button
               onClick={(e) => {
                 e.stopPropagation();

@@ -192,9 +192,9 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
           </div>
         </div>
 
-        <div className="px-6 pb-6">
+        <div className="px-4 pb-5 sm:px-6 sm:pb-6">
           <div className="-mt-20 flex gap-4">
-            <div className="h-48 w-32 shrink-0 overflow-hidden rounded-lg bg-ink-800 shadow-lg shadow-black/50 ring-1 ring-white/10">
+            <div className="h-[10.5rem] w-28 shrink-0 overflow-hidden rounded-lg bg-ink-800 shadow-lg shadow-black/50 ring-1 ring-white/10 sm:h-48 sm:w-32">
               {poster ? (
                 <img src={poster} alt={movie.title} className="h-full w-full object-cover" />
               ) : (
@@ -205,7 +205,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
             </div>
 
             <div className="min-w-0 flex-1 pt-20">
-              <h2 className="text-xl font-semibold leading-tight text-white">{movie.title}</h2>
+              <h2 className="text-lg font-semibold leading-tight text-white sm:text-xl">{movie.title}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-600">
                 {releaseYear && <span>{releaseYear}</span>}
                 {runtime && (
@@ -292,7 +292,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
           <div className="inset-panel mt-5 space-y-4 p-4">
             <div>
               <div className={fieldLabel}>Status</div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {STATUS_ORDER.map((status) => {
                   const active = movie.status === status;
                   return (
@@ -559,7 +559,7 @@ function PreviewDetail({ id }: { id: number }) {
           </div>
         </div>
 
-        <div className="px-6 pb-6">
+        <div className="px-4 pb-5 sm:px-6 sm:pb-6">
           {loading ? (
             <p className="pt-8 text-[13px] text-ink-600">Loading movie…</p>
           ) : error ? (
@@ -571,7 +571,7 @@ function PreviewDetail({ id }: { id: number }) {
           ) : (
             <>
               <div className="-mt-20 flex gap-4">
-                <div className="h-48 w-32 shrink-0 overflow-hidden rounded-lg bg-ink-800 shadow-lg shadow-black/50 ring-1 ring-white/10">
+                <div className="h-[10.5rem] w-28 shrink-0 overflow-hidden rounded-lg bg-ink-800 shadow-lg shadow-black/50 ring-1 ring-white/10 sm:h-48 sm:w-32">
                   {poster ? (
                     <img src={poster} alt={details.title} className="h-full w-full object-cover" />
                   ) : (
@@ -582,7 +582,7 @@ function PreviewDetail({ id }: { id: number }) {
                 </div>
 
                 <div className="min-w-0 flex-1 pt-20">
-                  <h2 className="text-xl font-semibold leading-tight text-white">{details.title}</h2>
+                  <h2 className="text-lg font-semibold leading-tight text-white sm:text-xl">{details.title}</h2>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-600">
                     {releaseYear && <span>{releaseYear}</span>}
                     {runtime && (

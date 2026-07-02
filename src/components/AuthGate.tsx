@@ -25,7 +25,7 @@ export function AuthGate() {
   };
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-ink-950 p-4">
+    <div className="flex h-screen w-screen items-center justify-center bg-ink-950 p-4 h-[100dvh]">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-gradient-to-b from-brand to-brand-strong text-white shadow-lg">
