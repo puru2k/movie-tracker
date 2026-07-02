@@ -1,20 +1,18 @@
-import { isTauri } from "@tauri-apps/api/core";
 import { supabaseEnabled } from "./supabase";
-import * as tauriDb from "./db";
 import * as cloudDb from "./cloudDb";
 import * as localDb from "./localDb";
 
 /**
- * Data-layer selector. The desktop (Tauri) app always uses local SQLite. On the
- * web, users can browse as a guest (localStorage) or sign in for cloud sync
- * (Supabase) — the mode is chosen at runtime, so all calls dispatch lazily.
+ * Data-layer selector for the web app. Users can browse as a guest
+ * (localStorage) or sign in for cloud sync (Supabase). The mode is chosen at
+ * runtime, so every call dispatches lazily to the active backend.
  */
-export type RepoMode = "tauri" | "cloud" | "local";
+export type RepoMode = "cloud" | "local";
 
-/** True on the web when a Supabase backend is configured (accounts possible). */
-export const cloudAvailable = !isTauri() && supabaseEnabled;
+/** True when a Supabase backend is configured, i.e. accounts are possible. */
+export const cloudAvailable = supabaseEnabled;
 
-let mode: RepoMode = isTauri() ? "tauri" : "local";
+let mode: RepoMode = "local";
 
 export function setRepoMode(m: RepoMode): void {
   mode = m;
@@ -25,38 +23,32 @@ export function getRepoMode(): RepoMode {
 }
 
 function impl() {
-  if (mode === "tauri") return tauriDb;
-  if (mode === "cloud") return cloudDb;
-  return localDb;
+  return mode === "cloud" ? cloudDb : localDb;
 }
 
-export const listMovies: typeof tauriDb.listMovies = (status) => impl().listMovies(status);
-export const getMovie: typeof tauriDb.getMovie = (id) => impl().getMovie(id);
-export const getSavedIds: typeof tauriDb.getSavedIds = () => impl().getSavedIds();
-export const addMovie: typeof tauriDb.addMovie = (details, status) =>
+export const listMovies: typeof cloudDb.listMovies = (status) => impl().listMovies(status);
+export const getMovie: typeof cloudDb.getMovie = (id) => impl().getMovie(id);
+export const getSavedIds: typeof cloudDb.getSavedIds = () => impl().getSavedIds();
+export const addMovie: typeof cloudDb.addMovie = (details, status) =>
   impl().addMovie(details, status);
-export const updateStatus: typeof tauriDb.updateStatus = (id, status) =>
+export const updateStatus: typeof cloudDb.updateStatus = (id, status) =>
   impl().updateStatus(id, status);
-export const updateRating: typeof tauriDb.updateRating = (id, rating) =>
+export const updateRating: typeof cloudDb.updateRating = (id, rating) =>
   impl().updateRating(id, rating);
-export const updateWatchDate: typeof tauriDb.updateWatchDate = (id, date) =>
+export const updateWatchDate: typeof cloudDb.updateWatchDate = (id, date) =>
   impl().updateWatchDate(id, date);
-export const updateNotes: typeof tauriDb.updateNotes = (id, notes) => impl().updateNotes(id, notes);
-export const updateRewatchCount: typeof tauriDb.updateRewatchCount = (id, count) =>
+export const updateNotes: typeof cloudDb.updateNotes = (id, notes) => impl().updateNotes(id, notes);
+export const updateRewatchCount: typeof cloudDb.updateRewatchCount = (id, count) =>
   impl().updateRewatchCount(id, count);
-export const updatePlatform: typeof tauriDb.updatePlatform = (id, platform) =>
+export const updatePlatform: typeof cloudDb.updatePlatform = (id, platform) =>
   impl().updatePlatform(id, platform);
-export const updateTags: typeof tauriDb.updateTags = (id, tags) => impl().updateTags(id, tags);
-export const updateFavorite: typeof tauriDb.updateFavorite = (id, favorite) =>
+export const updateTags: typeof cloudDb.updateTags = (id, tags) => impl().updateTags(id, tags);
+export const updateFavorite: typeof cloudDb.updateFavorite = (id, favorite) =>
   impl().updateFavorite(id, favorite);
-export const updateWatchDates: typeof tauriDb.updateWatchDates = (id, dates) =>
+export const updateWatchDates: typeof cloudDb.updateWatchDates = (id, dates) =>
   impl().updateWatchDates(id, dates);
-export const updateReview: typeof tauriDb.updateReview = (id, review) =>
+export const updateReview: typeof cloudDb.updateReview = (id, review) =>
   impl().updateReview(id, review);
-export const updateSpoiler: typeof tauriDb.updateSpoiler = (id, spoiler) =>
+export const updateSpoiler: typeof cloudDb.updateSpoiler = (id, spoiler) =>
   impl().updateSpoiler(id, spoiler);
-export const updatePosterCache: typeof tauriDb.updatePosterCache = (id, uri) =>
-  impl().updatePosterCache(id, uri);
-export const moviesNeedingPosterCache: typeof tauriDb.moviesNeedingPosterCache = () =>
-  impl().moviesNeedingPosterCache();
-export const deleteMovie: typeof tauriDb.deleteMovie = (id) => impl().deleteMovie(id);
+export const deleteMovie: typeof cloudDb.deleteMovie = (id) => impl().deleteMovie(id);

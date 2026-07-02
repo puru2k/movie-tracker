@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { isTauri } from "@tauri-apps/api/core";
 import { useAppStore } from "./store/useAppStore";
 import { tabLabel } from "./types";
 import { Sidebar } from "./components/Sidebar";
@@ -24,10 +23,7 @@ import {
   MenuIcon,
 } from "./components/Icons";
 import type { GridSize } from "./types";
-import { runPosterCache } from "./lib/posterCache";
 import { MOVIE_QUOTES } from "./lib/quotes";
-
-const IN_BROWSER = !isTauri();
 
 const EMPTY_COPY: Record<string, string> = {
   to_watch: "Movies you plan to watch will show up here.",
@@ -46,7 +42,6 @@ export default function App() {
   const activeTab = useAppStore((s) => s.activeTab);
   const openSearch = useAppStore((s) => s.openSearch);
   const selectMovie = useAppStore((s) => s.selectMovie);
-  const refresh = useAppStore((s) => s.refresh);
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const advancedOpen = useAppStore((s) => s.advancedOpen);
@@ -68,19 +63,6 @@ export default function App() {
   useEffect(() => {
     void init();
   }, [init]);
-
-  // Best-effort offline poster caching: download any uncached posters, then
-  // refresh so the cached (offline-ready) versions are used. Never throws.
-  useEffect(() => {
-    if (loading || movies.length === 0) return;
-    let cancelled = false;
-    void runPosterCache().then((cached) => {
-      if (cached && !cancelled) void refresh();
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [loading, movies.length, refresh]);
 
   const inTab = useMemo(
     () =>
@@ -135,9 +117,9 @@ export default function App() {
           </button>
         </div>
       )}
-      {IN_BROWSER && !cloud && (
+      {!cloud && (
         <div className="shrink-0 border-b border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-center text-[11px] text-amber-300/90">
-          Library is saved in this browser only. Open the desktop app for full offline storage.
+          Your library is saved in this browser only.
         </div>
       )}
       <div className="relative flex min-h-0 flex-1 overflow-hidden">

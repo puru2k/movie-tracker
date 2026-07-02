@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { openExternal } from "../lib/openExternal";
 import { useAppStore } from "../store/useAppStore";
 import {
   tmdbImage,
@@ -266,7 +266,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {extras.trailerUrl && (
                 <button
-                  onClick={() => void openUrl(extras.trailerUrl!)}
+                  onClick={() => openExternal(extras.trailerUrl!)}
                   className="btn btn-secondary btn-sm"
                 >
                   <PlayIcon width={13} height={13} />
@@ -643,7 +643,7 @@ function PreviewDetail({ id }: { id: number }) {
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   {extras.trailerUrl && (
                     <button
-                      onClick={() => void openUrl(extras.trailerUrl!)}
+                      onClick={() => openExternal(extras.trailerUrl!)}
                       className="btn btn-secondary btn-sm"
                     >
                       <PlayIcon width={13} height={13} />

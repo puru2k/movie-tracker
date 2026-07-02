@@ -17,11 +17,6 @@ dist-ssr
 .env.local
 .env.*.local
 
-# Build artifacts / bundles
-*.app
-/app-icon.png
-/Movie Tracker.app
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

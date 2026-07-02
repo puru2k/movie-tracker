@@ -1,8 +1,6 @@
-import { invoke } from "@tauri-apps/api/core";
-import { open, save } from "@tauri-apps/plugin-dialog";
 import { parseCsv, toCsv } from "./csv";
 import { getMovieDetails, searchMovies } from "./tmdb";
-import * as db from "./db";
+import * as db from "./repo";
 import type { MovieView, WatchStatus } from "../types";
 
 const EXPORT_HEADERS = [
@@ -22,8 +20,8 @@ function statusLabel(status: WatchStatus): string {
   return status === "to_watch" ? "To Watch" : status === "watching" ? "Watching" : "Watched";
 }
 
-/** Export the whole library to a CSV file. Returns number of rows, or null if cancelled. */
-export async function exportLibrary(movies: MovieView[]): Promise<number | null> {
+/** Export the whole library to a CSV file (browser download). Returns row count. */
+export async function exportLibrary(movies: MovieView[]): Promise<number> {
   const rows = movies.map((m) => ({
     Title: m.title,
     Year: m.release_date ? m.release_date.slice(0, 4) : "",
@@ -38,12 +36,15 @@ export async function exportLibrary(movies: MovieView[]): Promise<number | null>
   }));
 
   const csv = toCsv(EXPORT_HEADERS, rows);
-  const path = await save({
-    defaultPath: "movie-tracker-export.csv",
-    filters: [{ name: "CSV", extensions: ["csv"] }],
-  });
-  if (!path) return null;
-  await invoke("write_text_file", { path, contents: csv });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "movie-tracker-export.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
   return rows.length;
 }
 
@@ -86,23 +87,16 @@ function normalizeRating(raw: string): number | null {
 }
 
 /**
- * Import a CSV (our own export format or a Letterboxd export). For each row we
- * resolve the film on TMDB (by id if present, else by title/year search),
- * fetch full metadata, and add it to the library.
+ * Import a CSV file (our own export format or a Letterboxd export). For each
+ * row we resolve the film on TMDB (by id if present, else by title/year
+ * search), fetch full metadata, and add it to the library.
  */
 export async function importLibrary(
+  file: File,
   apiKey: string,
   onProgress: (p: ImportProgress) => void,
 ): Promise<ImportSummary> {
-  const path = await open({
-    multiple: false,
-    filters: [{ name: "CSV", extensions: ["csv"] }],
-  });
-  if (!path || typeof path !== "string") {
-    return { imported: 0, skipped: 0, failed: 0, cancelled: true };
-  }
-
-  const text = await invoke<string>("read_text_file", { path });
+  const text = await file.text();
   const records = parseCsv(text);
 
   let imported = 0;

@@ -140,15 +140,6 @@ export async function updateSpoiler(tmdbId: number, spoiler: boolean): Promise<v
   patch(tmdbId, { spoiler: spoiler ? 1 : 0 });
 }
 
-// Poster caching is a desktop-only offline feature; no-ops for guests.
-export async function updatePosterCache(_tmdbId: number, _dataUri: string): Promise<void> {}
-
-export async function moviesNeedingPosterCache(): Promise<
-  { tmdb_id: number; poster_path: string }[]
-> {
-  return [];
-}
-
 export async function deleteMovie(tmdbId: number): Promise<void> {
   save(load().filter((m) => m.tmdb_id !== tmdbId));
 }

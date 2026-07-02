@@ -7,7 +7,6 @@ import type {
   TmdbMovieDetails,
   WatchStatus,
 } from "../types";
-import { isTauri } from "@tauri-apps/api/core";
 import * as db from "../lib/repo";
 import { cloudAvailable, setRepoMode } from "../lib/repo";
 import { supabase } from "../lib/supabase";
@@ -60,7 +59,10 @@ interface AppState {
   needsAuth: boolean;
   userEmail: string | null;
   authError: string | null;
+  authNotice: string | null;
   authBusy: boolean;
+  /** True while completing a password-recovery link (show "set new password"). */
+  recovery: boolean;
 
   // ui
   view: AppView;
@@ -91,6 +93,9 @@ interface AppState {
   signOut: () => Promise<void>;
   continueAsGuest: () => Promise<void>;
   openSignIn: () => void;
+  resetPassword: (email: string) => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 
   // ui actions
   setView: (view: AppView) => void;
@@ -139,7 +144,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   needsAuth: false,
   userEmail: null,
   authError: null,
+  authNotice: null,
   authBusy: false,
+  recovery: false,
 
   view: "discover",
   activeTab: "to_watch",
@@ -159,10 +166,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   init: async () => {
     try {
       const prefs = await getDisplayPrefs();
-      // TMDB key: local store on desktop; shared build-time env on the web.
-      const apiKey = isTauri()
-        ? await getApiKey()
-        : import.meta.env.VITE_TMDB_API_KEY ?? null;
+      // TMDB key: an optional per-device override wins, else the build-time env key.
+      const override = await getApiKey();
+      const apiKey = override ?? import.meta.env.VITE_TMDB_API_KEY ?? null;
       set({
         apiKey,
         layout: prefs.layout,
@@ -170,11 +176,14 @@ export const useAppStore = create<AppState>((set, get) => ({
         settingsLoaded: true,
       });
 
-      // Cloud (web) mode: sign-in is optional. If there's a session, load the
+      // Cloud mode: sign-in is optional. If there's a session, load the
       // account's library; otherwise fall through to guest (localStorage) mode.
       if (cloudAvailable && supabase) {
         supabase.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_IN" && session) {
+          if (event === "PASSWORD_RECOVERY") {
+            // User followed a reset link — prompt them to set a new password.
+            set({ recovery: true, needsAuth: true, authError: null, authNotice: null });
+          } else if (event === "SIGNED_IN" && session) {
             setRepoMode("cloud");
             void db
               .listMovies()
@@ -183,7 +192,7 @@ export const useAppStore = create<AppState>((set, get) => ({
                   movies,
                   userEmail: session.user.email ?? null,
                   guest: false,
-                  needsAuth: false,
+                  needsAuth: get().recovery ? s.needsAuth : false,
                   error: null,
                   activeTab: movies.length ? movies[0].status : s.activeTab,
                 })),
@@ -213,19 +222,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         return;
       }
 
-      // Web without a cloud backend configured: guest (localStorage) mode.
-      if (!isTauri()) {
-        await get().continueAsGuest();
-        return;
-      }
-
-      // Desktop: local SQLite.
-      const movies = await db.listMovies();
-      set({
-        movies,
-        activeTab: movies.length ? movies[0].status : "to_watch",
-        loading: false,
-      });
+      // No cloud backend configured: guest (localStorage) mode.
+      await get().continueAsGuest();
     } catch (e) {
       set({
         error: e instanceof Error ? e.message : String(e),
@@ -247,14 +245,14 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   signIn: async (email, password) => {
     if (!supabase) return;
-    set({ authBusy: true, authError: null });
+    set({ authBusy: true, authError: null, authNotice: null });
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     set({ authBusy: false, authError: error ? error.message : null });
   },
 
   signUp: async (email, password) => {
     if (!supabase) return;
-    set({ authBusy: true, authError: null });
+    set({ authBusy: true, authError: null, authNotice: null });
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) {
       set({ authBusy: false, authError: error.message });
@@ -262,9 +260,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
     set({
       authBusy: false,
-      authError: data.session
+      authNotice: data.session
         ? null
-        : "Account created — check your email to confirm, then sign in.",
+        : "Account created — check your email for a confirmation link, then sign in.",
     });
   },
 
@@ -272,6 +270,61 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!supabase) return;
     await supabase.auth.signOut();
     // onAuthStateChange("SIGNED_OUT") drops back to guest mode.
+  },
+
+  resetPassword: async (email) => {
+    if (!supabase) return;
+    if (!email.trim()) {
+      set({ authError: "Enter your email above first, then tap “Forgot password”." });
+      return;
+    }
+    set({ authBusy: true, authError: null, authNotice: null });
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+    set({
+      authBusy: false,
+      authError: error ? error.message : null,
+      authNotice: error
+        ? null
+        : "If an account exists for that email, a password-reset link is on its way.",
+    });
+  },
+
+  resendConfirmation: async (email) => {
+    if (!supabase) return;
+    if (!email.trim()) {
+      set({ authError: "Enter your email above first, then tap “Resend confirmation”." });
+      return;
+    }
+    set({ authBusy: true, authError: null, authNotice: null });
+    const { error } = await supabase.auth.resend({ type: "signup", email: email.trim() });
+    set({
+      authBusy: false,
+      authError: error ? error.message : null,
+      authNotice: error ? null : "Confirmation email sent — check your inbox.",
+    });
+  },
+
+  updatePassword: async (password) => {
+    if (!supabase) return;
+    set({ authBusy: true, authError: null, authNotice: null });
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      set({ authBusy: false, authError: error.message });
+      return;
+    }
+    // Password changed; leave recovery mode and enter the app.
+    setRepoMode("cloud");
+    const movies = await db.listMovies().catch(() => []);
+    set((s) => ({
+      authBusy: false,
+      recovery: false,
+      needsAuth: false,
+      guest: false,
+      movies,
+      authNotice: null,
+      activeTab: movies.length ? movies[0].status : s.activeTab,
+    }));
   },
 
   continueAsGuest: async () => {
@@ -291,7 +344,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  openSignIn: () => set({ needsAuth: true, authError: null }),
+  openSignIn: () => set({ needsAuth: true, authError: null, authNotice: null }),
 
   setView: (view) =>
     set((s) => ({ view, sidebarCollapsed: isMobile() ? true : s.sidebarCollapsed })),

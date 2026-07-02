@@ -1,10 +1,13 @@
-import { load, type Store } from "@tauri-apps/plugin-store";
 import type { GridSize, LibraryLayout } from "../types";
 
-const STORE_FILE = "settings.json";
-const KEY_TMDB = "tmdb_api_key";
-const KEY_LAYOUT = "library_layout";
-const KEY_GRID = "grid_size";
+/**
+ * Local, per-device settings persisted in the browser's localStorage:
+ * an optional TMDB API key override and display preferences.
+ */
+
+const KEY_TMDB = "movietracker.tmdb_api_key";
+const KEY_LAYOUT = "movietracker.library_layout";
+const KEY_GRID = "movietracker.grid_size";
 
 export interface DisplayPrefs {
   layout: LibraryLayout;
@@ -13,52 +16,47 @@ export interface DisplayPrefs {
 
 const DEFAULT_PREFS: DisplayPrefs = { layout: "grid", gridSize: "medium" };
 
-let storePromise: Promise<Store> | null = null;
-
-function getStore(): Promise<Store> {
-  if (!storePromise) {
-    storePromise = load(STORE_FILE, { defaults: {}, autoSave: true });
+function read(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
   }
-  return storePromise;
 }
 
+function write(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable — settings stay in memory for this session */
+  }
+}
+
+/** Optional user-provided TMDB key. Falls back to the build-time env key. */
 export async function getApiKey(): Promise<string | null> {
-  const store = await getStore();
-  const value = await store.get<string>(KEY_TMDB);
-  return value ?? null;
+  return read(KEY_TMDB);
 }
 
 export async function setApiKey(key: string): Promise<void> {
-  const store = await getStore();
-  await store.set(KEY_TMDB, key.trim());
-  await store.save();
+  write(KEY_TMDB, key.trim());
 }
 
 export async function clearApiKey(): Promise<void> {
-  const store = await getStore();
-  await store.delete(KEY_TMDB);
-  await store.save();
+  try {
+    localStorage.removeItem(KEY_TMDB);
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Display preferences (layout + grid density). Falls back to defaults. */
 export async function getDisplayPrefs(): Promise<DisplayPrefs> {
-  try {
-    const store = await getStore();
-    const layout = (await store.get<LibraryLayout>(KEY_LAYOUT)) ?? DEFAULT_PREFS.layout;
-    const gridSize = (await store.get<GridSize>(KEY_GRID)) ?? DEFAULT_PREFS.gridSize;
-    return { layout, gridSize };
-  } catch {
-    return { ...DEFAULT_PREFS };
-  }
+  const layout = (read(KEY_LAYOUT) as LibraryLayout | null) ?? DEFAULT_PREFS.layout;
+  const gridSize = (read(KEY_GRID) as GridSize | null) ?? DEFAULT_PREFS.gridSize;
+  return { layout, gridSize };
 }
 
 export async function setDisplayPrefs(prefs: Partial<DisplayPrefs>): Promise<void> {
-  try {
-    const store = await getStore();
-    if (prefs.layout) await store.set(KEY_LAYOUT, prefs.layout);
-    if (prefs.gridSize) await store.set(KEY_GRID, prefs.gridSize);
-    await store.save();
-  } catch {
-    /* best-effort; prefs stay in-memory in the browser preview */
-  }
+  if (prefs.layout) write(KEY_LAYOUT, prefs.layout);
+  if (prefs.gridSize) write(KEY_GRID, prefs.gridSize);
 }

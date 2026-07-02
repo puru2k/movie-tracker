@@ -7,8 +7,8 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const supabaseEnabled = Boolean(url && anonKey);
 
 /**
- * Supabase client, or null when not configured. Only used on the web build;
- * the desktop (Tauri) app keeps using local SQLite regardless.
+ * Supabase client, or null when not configured. When unset, the app runs in
+ * guest mode with the library stored in the browser's localStorage.
  */
 export const supabase: SupabaseClient | null = supabaseEnabled
   ? createClient(url!, anonKey!, {

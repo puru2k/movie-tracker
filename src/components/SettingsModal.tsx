@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { useRef, useState } from "react";
+import { openExternal } from "../lib/openExternal";
 import { useAppStore } from "../store/useAppStore";
 import { validateApiKey } from "../lib/tmdb";
 import { exportLibrary, importLibrary, type ImportProgress } from "../lib/porting";
@@ -32,6 +32,7 @@ export function SettingsModal() {
   const [dataMsg, setDataMsg] = useState("");
   const [dataErr, setDataErr] = useState(false);
   const [progress, setProgress] = useState<ImportProgress | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
 
@@ -68,8 +69,12 @@ export function SettingsModal() {
     setDataErr(false);
     setDataMsg("");
     try {
+      if (movies.length === 0) {
+        setDataErr(true);
+        setDataMsg("Your library is empty — nothing to export yet.");
+        return;
+      }
       const count = await exportLibrary(movies);
-      if (count == null) return; // cancelled
       setDataMsg(`Exported ${count} ${count === 1 ? "movie" : "movies"} to CSV.`);
     } catch (e) {
       setDataErr(true);
@@ -77,29 +82,34 @@ export function SettingsModal() {
     }
   }
 
-  async function handleImport() {
+  function handleImportClick() {
     setDataErr(false);
     setDataMsg("");
     if (!apiKey) {
       setDataErr(true);
-      setDataMsg("Add your TMDB API key first — import looks up each film on TMDB.");
+      setDataMsg("A TMDB API key isn't configured, so imported titles can't be matched.");
       return;
     }
+    fileInputRef.current?.click();
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file || !apiKey) return;
+    setDataErr(false);
+    setDataMsg("");
     setProgress({ done: 0, total: 0, current: "" });
     try {
-      const summary = await importLibrary(apiKey, setProgress);
+      const summary = await importLibrary(file, apiKey, setProgress);
       await refresh();
-      if (summary.cancelled) {
-        setDataMsg("");
-      } else {
-        const parts = [`Imported ${summary.imported}`];
-        if (summary.skipped) parts.push(`skipped ${summary.skipped}`);
-        if (summary.failed) parts.push(`couldn't match ${summary.failed}`);
-        setDataMsg(parts.join(" · ") + ".");
-      }
-    } catch (e) {
+      const parts = [`Imported ${summary.imported}`];
+      if (summary.skipped) parts.push(`skipped ${summary.skipped}`);
+      if (summary.failed) parts.push(`couldn't match ${summary.failed}`);
+      setDataMsg(parts.join(" · ") + ".");
+    } catch (err) {
       setDataErr(true);
-      setDataMsg(e instanceof Error ? e.message : "Import failed.");
+      setDataMsg(err instanceof Error ? err.message : "Import failed.");
     } finally {
       setProgress(null);
     }
@@ -163,7 +173,7 @@ export function SettingsModal() {
               API key (v3 auth) from your account settings.{" "}
               <button
                 className="text-brand underline underline-offset-2 hover:text-brand/80"
-                onClick={() => void openUrl("https://www.themoviedb.org/settings/api")}
+                onClick={() => openExternal("https://www.themoviedb.org/settings/api")}
               >
                 Get an API key
               </button>
@@ -252,8 +262,7 @@ export function SettingsModal() {
           </div>
         </div>
 
-        {!cloud && (
-          <>
+        <>
             <div className="my-5 h-px bg-white/[0.06]" />
 
             <label className="mb-1 block text-[13px] font-medium text-white/90">Data</label>
@@ -261,6 +270,14 @@ export function SettingsModal() {
               Back up your library to a CSV file, or import from a CSV — including a Letterboxd
               export. Imported titles are matched and enriched via TMDB.
             </p>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportFile}
+            />
 
             {importing ? (
           <div className="rounded-lg bg-ink-950 p-3 ring-1 ring-white/10">
@@ -282,7 +299,7 @@ export function SettingsModal() {
             <button onClick={handleExport} className="btn btn-secondary btn-md flex-1">
               Export CSV
             </button>
-            <button onClick={handleImport} className="btn btn-secondary btn-md flex-1">
+            <button onClick={handleImportClick} className="btn btn-secondary btn-md flex-1">
               Import CSV
             </button>
           </div>
@@ -293,8 +310,7 @@ export function SettingsModal() {
             {dataMsg}
           </p>
         )}
-          </>
-        )}
+        </>
 
         <div className="mt-6 flex justify-end">
           <button onClick={close} className="btn btn-ghost btn-md">
