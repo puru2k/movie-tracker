@@ -1,0 +1,15 @@
+# Netlify deploy config for the web build.
+# Set the three VITE_* env vars in: Site settings → Environment variables.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback so any path resolves to the app.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
