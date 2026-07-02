@@ -7,7 +7,10 @@ import type {
   TmdbMovieDetails,
   WatchStatus,
 } from "../types";
-import * as db from "../lib/db";
+import { isTauri } from "@tauri-apps/api/core";
+import * as db from "../lib/repo";
+import { useCloud } from "../lib/repo";
+import { supabase } from "../lib/supabase";
 import {
   getApiKey,
   getDisplayPrefs,
@@ -47,6 +50,13 @@ interface AppState {
   apiKey: string | null;
   settingsLoaded: boolean;
 
+  // auth (web / cloud only)
+  cloud: boolean;
+  needsAuth: boolean;
+  userEmail: string | null;
+  authError: string | null;
+  authBusy: boolean;
+
   // ui
   view: AppView;
   activeTab: LibraryTab;
@@ -69,6 +79,11 @@ interface AppState {
 
   // settings actions
   saveApiKey: (key: string) => Promise<void>;
+
+  // auth actions
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 
   // ui actions
   setView: (view: AppView) => void;
@@ -112,6 +127,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   apiKey: null,
   settingsLoaded: false,
 
+  cloud: useCloud,
+  needsAuth: false,
+  userEmail: null,
+  authError: null,
+  authBusy: false,
+
   view: "discover",
   activeTab: "to_watch",
   searchOpen: false,
@@ -128,22 +149,70 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   init: async () => {
     try {
-      const [key, movies, prefs] = await Promise.all([
-        getApiKey(),
-        db.listMovies(),
-        getDisplayPrefs(),
-      ]);
-      // Open on a tab that actually has movies (most recently updated first)
-      // so the library never looks empty when it isn't.
-      const activeTab = movies.length ? movies[0].status : "to_watch";
+      const prefs = await getDisplayPrefs();
+      // TMDB key: local store on desktop; shared build-time env on the web.
+      const apiKey = isTauri()
+        ? await getApiKey()
+        : import.meta.env.VITE_TMDB_API_KEY ?? null;
       set({
-        apiKey: key,
-        movies,
-        activeTab,
-        loading: false,
-        settingsLoaded: true,
+        apiKey,
         layout: prefs.layout,
         gridSize: prefs.gridSize,
+        settingsLoaded: true,
+      });
+
+      // Cloud (web) mode: gate on a signed-in Supabase session.
+      if (useCloud && supabase) {
+        supabase.auth.onAuthStateChange((_event, session) => {
+          if (session) {
+            void db
+              .listMovies()
+              .then((movies) =>
+                set((s) => ({
+                  movies,
+                  userEmail: session.user.email ?? null,
+                  needsAuth: false,
+                  error: null,
+                  activeTab: movies.length ? movies[0].status : s.activeTab,
+                })),
+              )
+              .catch((e) =>
+                set({ error: e instanceof Error ? e.message : String(e) }),
+              );
+          } else {
+            set({ movies: [], needsAuth: true, userEmail: null });
+          }
+        });
+
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
+        if (session) {
+          const movies = await db.listMovies();
+          set({
+            movies,
+            userEmail: session.user.email ?? null,
+            needsAuth: false,
+            activeTab: movies.length ? movies[0].status : "to_watch",
+            loading: false,
+          });
+        } else {
+          set({ needsAuth: true, loading: false });
+        }
+        return;
+      }
+
+      // Unconfigured web preview: no persistence, just browse.
+      if (!isTauri()) {
+        set({ movies: [], activeTab: "to_watch", loading: false });
+        return;
+      }
+
+      // Desktop: local SQLite.
+      const movies = await db.listMovies();
+      set({
+        movies,
+        activeTab: movies.length ? movies[0].status : "to_watch",
+        loading: false,
       });
     } catch (e) {
       set({
@@ -162,6 +231,35 @@ export const useAppStore = create<AppState>((set, get) => ({
   saveApiKey: async (key) => {
     await persistApiKey(key);
     set({ apiKey: key.trim() });
+  },
+
+  signIn: async (email, password) => {
+    if (!supabase) return;
+    set({ authBusy: true, authError: null });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    set({ authBusy: false, authError: error ? error.message : null });
+  },
+
+  signUp: async (email, password) => {
+    if (!supabase) return;
+    set({ authBusy: true, authError: null });
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      set({ authBusy: false, authError: error.message });
+      return;
+    }
+    set({
+      authBusy: false,
+      authError: data.session
+        ? null
+        : "Account created — check your email to confirm, then sign in.",
+    });
+  },
+
+  signOut: async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+    set({ movies: [], needsAuth: true, userEmail: null });
   },
 
   setView: (view) => set({ view }),

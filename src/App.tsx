@@ -13,6 +13,7 @@ import { DiscoverView } from "./components/DiscoverView";
 import { RecommendationsView } from "./components/RecommendationsView";
 import { PersonModal } from "./components/PersonModal";
 import { AdvancedSearchModal } from "./components/AdvancedSearchModal";
+import { AuthGate } from "./components/AuthGate";
 import {
   FilmIcon,
   SearchIcon,
@@ -48,6 +49,8 @@ export default function App() {
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const advancedOpen = useAppStore((s) => s.advancedOpen);
+  const cloud = useAppStore((s) => s.cloud);
+  const needsAuth = useAppStore((s) => s.needsAuth);
   const layout = useAppStore((s) => s.layout);
   const gridSize = useAppStore((s) => s.gridSize);
   const setLayout = useAppStore((s) => s.setLayout);
@@ -114,9 +117,11 @@ export default function App() {
     });
   }, [inTab, filter]);
 
+  if (cloud && needsAuth) return <AuthGate />;
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden">
-      {IN_BROWSER && (
+      {IN_BROWSER && !cloud && (
         <div className="shrink-0 border-b border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-center text-[11px] text-amber-300/90">
           Preview mode — data is not saved in the browser. Open the desktop app to store your
           library.

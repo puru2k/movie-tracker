@@ -19,6 +19,9 @@ export function SettingsModal() {
   const gridSize = useAppStore((s) => s.gridSize);
   const setLayout = useAppStore((s) => s.setLayout);
   const setGridSize = useAppStore((s) => s.setGridSize);
+  const cloud = useAppStore((s) => s.cloud);
+  const userEmail = useAppStore((s) => s.userEmail);
+  const signOut = useAppStore((s) => s.signOut);
 
   const [value, setValue] = useState(apiKey ?? "");
   const [status, setStatus] = useState<Status>("idle");
@@ -122,45 +125,66 @@ export function SettingsModal() {
           </button>
         </div>
 
-        <label className="mb-2 block text-[13px] font-medium text-white/90">TMDB API Key</label>
-        <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
-          Movie search and metadata are powered by TMDB. Create a free account, then copy your
-          API key (v3 auth) from your account settings.{" "}
-          <button
-            className="text-brand underline underline-offset-2 hover:text-brand/80"
-            onClick={() => void openUrl("https://www.themoviedb.org/settings/api")}
-          >
-            Get an API key
-          </button>
-        </p>
-
-        <div className="flex gap-2">
-          <input
-            type="password"
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              setStatus("idle");
-            }}
-            placeholder="Paste your TMDB API key"
-            className="min-w-0 flex-1 rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand"
-          />
-          <button
-            onClick={handleSave}
-            disabled={status === "checking"}
-            className="shrink-0 rounded-lg bg-brand px-4 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong disabled:opacity-60"
-          >
-            {status === "checking" ? "Checking…" : "Save"}
-          </button>
-        </div>
-
-        {message && (
-          <p className={`mt-2 text-[12px] ${status === "error" ? "text-red-400" : "text-emerald-400"}`}>
-            {message}
-          </p>
+        {cloud && (
+          <>
+            <label className="mb-2 block text-[13px] font-medium text-white/90">Account</label>
+            <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
+              Signed in as <span className="text-white/80">{userEmail ?? "—"}</span>. Your library
+              is stored in your account and syncs across devices.
+            </p>
+            <button
+              onClick={() => void signOut()}
+              className="rounded-lg bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
+            >
+              Sign out
+            </button>
+            <div className="my-5 h-px bg-white/[0.06]" />
+          </>
         )}
 
-        <div className="my-5 h-px bg-white/[0.06]" />
+        {!cloud && (
+          <>
+            <label className="mb-2 block text-[13px] font-medium text-white/90">TMDB API Key</label>
+            <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
+              Movie search and metadata are powered by TMDB. Create a free account, then copy your
+              API key (v3 auth) from your account settings.{" "}
+              <button
+                className="text-brand underline underline-offset-2 hover:text-brand/80"
+                onClick={() => void openUrl("https://www.themoviedb.org/settings/api")}
+              >
+                Get an API key
+              </button>
+            </p>
+
+            <div className="flex gap-2">
+              <input
+                type="password"
+                value={value}
+                onChange={(e) => {
+                  setValue(e.target.value);
+                  setStatus("idle");
+                }}
+                placeholder="Paste your TMDB API key"
+                className="min-w-0 flex-1 rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand"
+              />
+              <button
+                onClick={handleSave}
+                disabled={status === "checking"}
+                className="shrink-0 rounded-lg bg-brand px-4 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong disabled:opacity-60"
+              >
+                {status === "checking" ? "Checking…" : "Save"}
+              </button>
+            </div>
+
+            {message && (
+              <p className={`mt-2 text-[12px] ${status === "error" ? "text-red-400" : "text-emerald-400"}`}>
+                {message}
+              </p>
+            )}
+
+            <div className="my-5 h-px bg-white/[0.06]" />
+          </>
+        )}
 
         <label className="mb-1 block text-[13px] font-medium text-white/90">Display</label>
         <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
@@ -215,15 +239,17 @@ export function SettingsModal() {
           </div>
         </div>
 
-        <div className="my-5 h-px bg-white/[0.06]" />
+        {!cloud && (
+          <>
+            <div className="my-5 h-px bg-white/[0.06]" />
 
-        <label className="mb-1 block text-[13px] font-medium text-white/90">Data</label>
-        <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
-          Back up your library to a CSV file, or import from a CSV — including a Letterboxd export.
-          Imported titles are matched and enriched via TMDB.
-        </p>
+            <label className="mb-1 block text-[13px] font-medium text-white/90">Data</label>
+            <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
+              Back up your library to a CSV file, or import from a CSV — including a Letterboxd
+              export. Imported titles are matched and enriched via TMDB.
+            </p>
 
-        {importing ? (
+            {importing ? (
           <div className="rounded-lg bg-ink-950 p-3 ring-1 ring-white/10">
             <div className="mb-2 flex justify-between text-[12px] text-white/80">
               <span className="truncate pr-2">Importing {progress?.current}</span>
@@ -259,6 +285,8 @@ export function SettingsModal() {
           <p className={`mt-2 text-[12px] ${dataErr ? "text-red-400" : "text-emerald-400"}`}>
             {dataMsg}
           </p>
+        )}
+          </>
         )}
 
         <div className="mt-6 flex justify-end">

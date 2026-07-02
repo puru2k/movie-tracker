@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Local env / secrets
+.env
+.env.local
+.env.*.local
+
 # Build artifacts / bundles
 *.app
 /app-icon.png
