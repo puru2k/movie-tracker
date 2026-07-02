@@ -20,8 +20,10 @@ export function SettingsModal() {
   const setLayout = useAppStore((s) => s.setLayout);
   const setGridSize = useAppStore((s) => s.setGridSize);
   const cloud = useAppStore((s) => s.cloud);
+  const guest = useAppStore((s) => s.guest);
   const userEmail = useAppStore((s) => s.userEmail);
   const signOut = useAppStore((s) => s.signOut);
+  const openSignIn = useAppStore((s) => s.openSignIn);
 
   const [value, setValue] = useState(apiKey ?? "");
   const [status, setStatus] = useState<Status>("idle");
@@ -128,16 +130,36 @@ export function SettingsModal() {
         {cloud && (
           <>
             <label className="mb-2 block text-[13px] font-medium text-white/90">Account</label>
-            <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
-              Signed in as <span className="text-white/80">{userEmail ?? "—"}</span>. Your library
-              is stored in your account and syncs across devices.
-            </p>
-            <button
-              onClick={() => void signOut()}
-              className="rounded-lg bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
-            >
-              Sign out
-            </button>
+            {guest ? (
+              <>
+                <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
+                  You're browsing as a guest — your library is saved on this device only. Sign in
+                  to sync it to an account across devices.
+                </p>
+                <button
+                  onClick={() => {
+                    close();
+                    openSignIn();
+                  }}
+                  className="rounded-lg bg-brand px-4 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong"
+                >
+                  Sign in / Create account
+                </button>
+              </>
+            ) : (
+              <>
+                <p className="mb-3 text-[12px] leading-relaxed text-ink-600">
+                  Signed in as <span className="text-white/80">{userEmail ?? "—"}</span>. Your
+                  library is stored in your account and syncs across devices.
+                </p>
+                <button
+                  onClick={() => void signOut()}
+                  className="rounded-lg bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
+                >
+                  Sign out
+                </button>
+              </>
+            )}
             <div className="my-5 h-px bg-white/[0.06]" />
           </>
         )}

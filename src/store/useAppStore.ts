@@ -9,7 +9,7 @@ import type {
 } from "../types";
 import { isTauri } from "@tauri-apps/api/core";
 import * as db from "../lib/repo";
-import { useCloud } from "../lib/repo";
+import { cloudAvailable, setRepoMode } from "../lib/repo";
 import { supabase } from "../lib/supabase";
 import {
   getApiKey,
@@ -52,6 +52,7 @@ interface AppState {
 
   // auth (web / cloud only)
   cloud: boolean;
+  guest: boolean;
   needsAuth: boolean;
   userEmail: string | null;
   authError: string | null;
@@ -84,6 +85,8 @@ interface AppState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  continueAsGuest: () => Promise<void>;
+  openSignIn: () => void;
 
   // ui actions
   setView: (view: AppView) => void;
@@ -127,7 +130,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   apiKey: null,
   settingsLoaded: false,
 
-  cloud: useCloud,
+  cloud: cloudAvailable,
+  guest: false,
   needsAuth: false,
   userEmail: null,
   authError: null,
@@ -161,49 +165,52 @@ export const useAppStore = create<AppState>((set, get) => ({
         settingsLoaded: true,
       });
 
-      // Cloud (web) mode: gate on a signed-in Supabase session.
-      if (useCloud && supabase) {
-        supabase.auth.onAuthStateChange((_event, session) => {
-          if (session) {
+      // Cloud (web) mode: sign-in is optional. If there's a session, load the
+      // account's library; otherwise fall through to guest (localStorage) mode.
+      if (cloudAvailable && supabase) {
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === "SIGNED_IN" && session) {
+            setRepoMode("cloud");
             void db
               .listMovies()
               .then((movies) =>
                 set((s) => ({
                   movies,
                   userEmail: session.user.email ?? null,
+                  guest: false,
                   needsAuth: false,
                   error: null,
                   activeTab: movies.length ? movies[0].status : s.activeTab,
                 })),
               )
-              .catch((e) =>
-                set({ error: e instanceof Error ? e.message : String(e) }),
-              );
-          } else {
-            set({ movies: [], needsAuth: true, userEmail: null });
+              .catch((e) => set({ error: e instanceof Error ? e.message : String(e) }));
+          } else if (event === "SIGNED_OUT") {
+            void get().continueAsGuest();
           }
         });
 
         const { data } = await supabase.auth.getSession();
         const session = data.session;
         if (session) {
+          setRepoMode("cloud");
           const movies = await db.listMovies();
           set({
             movies,
             userEmail: session.user.email ?? null,
+            guest: false,
             needsAuth: false,
             activeTab: movies.length ? movies[0].status : "to_watch",
             loading: false,
           });
         } else {
-          set({ needsAuth: true, loading: false });
+          await get().continueAsGuest();
         }
         return;
       }
 
-      // Unconfigured web preview: no persistence, just browse.
+      // Web without a cloud backend configured: guest (localStorage) mode.
       if (!isTauri()) {
-        set({ movies: [], activeTab: "to_watch", loading: false });
+        await get().continueAsGuest();
         return;
       }
 
@@ -259,8 +266,27 @@ export const useAppStore = create<AppState>((set, get) => ({
   signOut: async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
-    set({ movies: [], needsAuth: true, userEmail: null });
+    // onAuthStateChange("SIGNED_OUT") drops back to guest mode.
   },
+
+  continueAsGuest: async () => {
+    setRepoMode("local");
+    try {
+      const movies = await db.listMovies();
+      set((s) => ({
+        movies,
+        guest: true,
+        needsAuth: false,
+        userEmail: null,
+        loading: false,
+        activeTab: movies.length ? movies[0].status : s.activeTab,
+      }));
+    } catch {
+      set({ movies: [], guest: true, needsAuth: false, userEmail: null, loading: false });
+    }
+  },
+
+  openSignIn: () => set({ needsAuth: true, authError: null }),
 
   setView: (view) => set({ view }),
   setActiveTab: (tab) => set({ activeTab: tab, view: "library" }),

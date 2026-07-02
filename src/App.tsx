@@ -50,7 +50,9 @@ export default function App() {
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const advancedOpen = useAppStore((s) => s.advancedOpen);
   const cloud = useAppStore((s) => s.cloud);
+  const guest = useAppStore((s) => s.guest);
   const needsAuth = useAppStore((s) => s.needsAuth);
+  const openSignIn = useAppStore((s) => s.openSignIn);
   const layout = useAppStore((s) => s.layout);
   const gridSize = useAppStore((s) => s.gridSize);
   const setLayout = useAppStore((s) => s.setLayout);
@@ -121,10 +123,20 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden">
+      {cloud && guest && (
+        <div className="flex shrink-0 items-center justify-center gap-2 border-b border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-center text-[11px] text-white/60">
+          <span>Browsing as a guest — your library is saved on this device.</span>
+          <button
+            onClick={openSignIn}
+            className="rounded-md bg-brand px-2 py-0.5 text-[11px] font-medium text-white transition hover:bg-brand-strong"
+          >
+            Sign in to sync
+          </button>
+        </div>
+      )}
       {IN_BROWSER && !cloud && (
         <div className="shrink-0 border-b border-amber-400/20 bg-amber-400/10 px-4 py-1.5 text-center text-[11px] text-amber-300/90">
-          Preview mode — data is not saved in the browser. Open the desktop app to store your
-          library.
+          Library is saved in this browser only. Open the desktop app for full offline storage.
         </div>
       )}
       <div className="flex min-h-0 flex-1 overflow-hidden">

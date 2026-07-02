@@ -9,6 +9,7 @@ const quote = MOVIE_QUOTES[Math.floor(Math.random() * MOVIE_QUOTES.length)];
 export function AuthGate() {
   const signIn = useAppStore((s) => s.signIn);
   const signUp = useAppStore((s) => s.signUp);
+  const continueAsGuest = useAppStore((s) => s.continueAsGuest);
   const authError = useAppStore((s) => s.authError);
   const authBusy = useAppStore((s) => s.authBusy);
 
@@ -97,6 +98,23 @@ export function AuthGate() {
             </button>
           </form>
         )}
+
+        <div className="mt-4 flex items-center gap-3 text-ink-600">
+          <div className="h-px flex-1 bg-white/[0.08]" />
+          <span className="text-[11px] uppercase tracking-wider">or</span>
+          <div className="h-px flex-1 bg-white/[0.08]" />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void continueAsGuest()}
+          className="mt-4 w-full rounded-lg bg-white/[0.06] py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
+        >
+          Continue as guest
+        </button>
+        <p className="mt-2 text-center text-[11px] text-ink-600">
+          No account needed — your library is saved on this device. Sign in anytime to sync it.
+        </p>
 
         <figure className="mt-6 text-center">
           <blockquote className="font-serif text-[12px] italic leading-snug text-white/45">
