@@ -21,12 +21,9 @@ export function PosterAddCard({
   const poster = tmdbImage(movie.poster_path, "w342");
   return (
     <div className="group w-full">
-      <button
-        onClick={onOpen}
-        className="relative aspect-[2/3] w-full cursor-pointer overflow-hidden rounded-xl bg-ink-800 ring-1 ring-white/[0.06]"
-      >
+      <button onClick={onOpen} className="poster cursor-pointer">
         {poster ? (
-          <img src={poster} alt={movie.title} loading="lazy" className="h-full w-full object-cover" />
+          <img src={poster} alt={movie.title} loading="lazy" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-ink-600">
             <FilmIcon width={22} height={22} />
@@ -34,14 +31,14 @@ export function PosterAddCard({
         )}
 
         {movie.vote_average != null && movie.vote_average > 0 && (
-          <div className="absolute right-1.5 top-1.5 flex items-center gap-0.5 rounded-md bg-black/65 px-1.5 py-0.5 text-[10px] font-semibold text-accent backdrop-blur-sm">
+          <div className="badge-glass absolute right-1.5 top-1.5 text-[10px] text-accent">
             <StarIcon width={9} height={9} />
             {movie.vote_average.toFixed(1)}
           </div>
         )}
 
         {saved ? (
-          <div className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-md bg-emerald-500/85 px-1.5 py-0.5 text-[9px] font-semibold text-white">
+          <div className="absolute left-1.5 top-1.5 flex items-center gap-1 rounded-md bg-positive/90 px-1.5 py-0.5 text-[9px] font-semibold text-white">
             <CheckIcon width={10} height={10} /> In library
           </div>
         ) : (
@@ -53,7 +50,7 @@ export function PosterAddCard({
               }}
               disabled={busy}
               title="Mark as watched"
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-md transition hover:bg-emerald-400 disabled:opacity-70"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-positive text-white shadow-md transition hover:brightness-110 active:scale-95 disabled:opacity-70"
             >
               <CheckIcon width={15} height={15} strokeWidth={2.5} />
             </button>
@@ -64,7 +61,7 @@ export function PosterAddCard({
               }}
               disabled={busy}
               title="Add to watchlist"
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white shadow-md transition hover:bg-brand-strong disabled:opacity-70"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white shadow-md transition hover:bg-brand-strong active:scale-95 disabled:opacity-70"
             >
               <PlusIcon width={16} height={16} strokeWidth={2.5} />
             </button>

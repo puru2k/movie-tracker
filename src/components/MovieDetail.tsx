@@ -58,7 +58,7 @@ function parseTags(input: string): string[] {
   );
 }
 
-const fieldLabel = "mb-2 text-xs font-medium uppercase tracking-wide text-ink-600";
+const fieldLabel = "field-label";
 
 /** Small back button shown when there's nested navigation history to pop. */
 function BackButton() {
@@ -66,12 +66,7 @@ function BackButton() {
   const navBack = useAppStore((s) => s.navBack);
   if (!canBack) return null;
   return (
-    <button
-      onClick={navBack}
-      title="Back"
-      aria-label="Back"
-      className="rounded-lg bg-black/40 p-1.5 text-white/80 backdrop-blur transition hover:bg-black/60 hover:text-white"
-    >
+    <button onClick={navBack} title="Back" aria-label="Back" className="icon-btn-glass">
       <ChevronLeftIcon width={18} height={18} />
     </button>
   );
@@ -168,14 +163,8 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
   }
 
   return (
-    <div
-      className="animate-overlay-in fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
-      onMouseDown={clearSelection}
-    >
-      <div
-        className="animate-fade-in my-[4vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-ink-850 ring-1 ring-white/10"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
+    <div className="overlay items-start justify-center overflow-y-auto" onMouseDown={clearSelection}>
+      <div className="modal my-[4vh] max-w-2xl" onMouseDown={(e) => e.stopPropagation()}>
         <div className="relative h-44 w-full bg-ink-800">
           {backdrop && (
             <img src={backdrop} alt="" className="h-full w-full object-cover opacity-40" />
@@ -189,9 +178,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
               onClick={() => setFavorite(movie.tmdb_id, !movie.favorite)}
               title={movie.favorite ? "Remove from favorites" : "Add to favorites"}
               aria-label="Toggle favorite"
-              className={`rounded-lg bg-black/40 p-1.5 backdrop-blur transition hover:bg-black/60 ${
-                movie.favorite ? "text-rose-500" : "text-white/80 hover:text-white"
-              }`}
+              className={`icon-btn-glass ${movie.favorite ? "text-rose-500 hover:text-rose-400" : ""}`}
             >
               <HeartIcon
                 width={18}
@@ -199,10 +186,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
                 fill={movie.favorite ? "currentColor" : "none"}
               />
             </button>
-            <button
-              onClick={clearSelection}
-              className="rounded-lg bg-black/40 p-1.5 text-white/80 backdrop-blur transition hover:bg-black/60 hover:text-white"
-            >
+            <button onClick={clearSelection} className="icon-btn-glass">
               <CloseIcon width={18} height={18} />
             </button>
           </div>
@@ -248,10 +232,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
               {movie.genres.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {movie.genres.map((g) => (
-                    <span
-                      key={g}
-                      className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-ink-600"
-                    >
+                    <span key={g} className="tag">
                       {g}
                     </span>
                   ))}
@@ -286,7 +267,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
               {extras.trailerUrl && (
                 <button
                   onClick={() => void openUrl(extras.trailerUrl!)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.08] px-3 py-1.5 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.14]"
+                  className="btn btn-secondary btn-sm"
                 >
                   <PlayIcon width={13} height={13} />
                   Trailer
@@ -308,7 +289,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
             </div>
           )}
 
-          <div className="mt-5 space-y-4 rounded-xl bg-ink-900/60 p-4 ring-1 ring-white/5">
+          <div className="inset-panel mt-5 space-y-4 p-4">
             <div>
               <div className={fieldLabel}>Status</div>
               <div className="flex gap-2">
@@ -426,7 +407,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
                   setPlatform(movie.tmdb_id, platformDraft.trim() || null)
                 }
                 placeholder="e.g. Netflix, Blu-ray, Theatre"
-                className="w-full rounded-lg bg-ink-950 px-3 py-2 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand placeholder:text-ink-600"
+                className="field"
               />
             </div>
 
@@ -437,15 +418,12 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
                 onChange={(e) => setTagsDraft(e.target.value)}
                 onBlur={() => setTags(movie.tmdb_id, parseTags(tagsDraft))}
                 placeholder="Comma-separated, e.g. Comfort, Halloween, Rainy day"
-                className="w-full rounded-lg bg-ink-950 px-3 py-2 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand placeholder:text-ink-600"
+                className="field"
               />
               {movie.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {movie.tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full bg-brand/15 px-2 py-0.5 text-[11px] text-brand"
-                    >
+                    <span key={t} className="tag-brand">
                       #{t}
                     </span>
                   ))}
@@ -476,7 +454,7 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
                 onChange={(e) => setReviewDraft(e.target.value)}
                 onBlur={() => setReview(movie.tmdb_id, reviewDraft.trim() || null)}
                 placeholder="One-line verdict…"
-                className="mb-2 w-full rounded-lg bg-ink-950 px-3 py-2 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand placeholder:text-ink-600"
+                className="field mb-2"
               />
               <textarea
                 value={notesDraft}
@@ -484,16 +462,13 @@ function LibraryDetail({ movie }: { movie: MovieView }) {
                 onBlur={() => setNotes(movie.tmdb_id, notesDraft.trim() || null)}
                 rows={4}
                 placeholder="Long review — thoughts, favorite quotes, memorable scenes…"
-                className="w-full resize-y rounded-lg bg-ink-950 px-3 py-2 text-sm leading-relaxed text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand placeholder:text-ink-600"
+                className="field resize-y leading-relaxed"
               />
             </div>
           </div>
 
           <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => removeMovie(movie.tmdb_id)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10"
-            >
+            <button onClick={() => removeMovie(movie.tmdb_id)} className="btn btn-danger btn-md">
               <TrashIcon width={16} height={16} />
               Remove from library
             </button>
@@ -567,14 +542,8 @@ function PreviewDetail({ id }: { id: number }) {
   }
 
   return (
-    <div
-      className="animate-overlay-in fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
-      onMouseDown={clearSelection}
-    >
-      <div
-        className="animate-fade-in my-[4vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-ink-850 ring-1 ring-white/10"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
+    <div className="overlay items-start justify-center overflow-y-auto" onMouseDown={clearSelection}>
+      <div className="modal my-[4vh] max-w-2xl" onMouseDown={(e) => e.stopPropagation()}>
         <div className="relative h-44 w-full bg-ink-800">
           {backdrop && (
             <img src={backdrop} alt="" className="h-full w-full object-cover opacity-40" />
@@ -584,10 +553,7 @@ function PreviewDetail({ id }: { id: number }) {
             <BackButton />
           </div>
           <div className="absolute right-3 top-3">
-            <button
-              onClick={clearSelection}
-              className="rounded-lg bg-black/40 p-1.5 text-white/80 backdrop-blur transition hover:bg-black/60 hover:text-white"
-            >
+            <button onClick={clearSelection} className="icon-btn-glass">
               <CloseIcon width={18} height={18} />
             </button>
           </div>
@@ -643,10 +609,7 @@ function PreviewDetail({ id }: { id: number }) {
                   {details.genres.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {details.genres.map((g) => (
-                        <span
-                          key={g}
-                          className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-ink-600"
-                        >
+                        <span key={g} className="tag">
                           {g}
                         </span>
                       ))}
@@ -681,7 +644,7 @@ function PreviewDetail({ id }: { id: number }) {
                   {extras.trailerUrl && (
                     <button
                       onClick={() => void openUrl(extras.trailerUrl!)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.08] px-3 py-1.5 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.14]"
+                      className="btn btn-secondary btn-sm"
                     >
                       <PlayIcon width={13} height={13} />
                       Trailer
@@ -703,12 +666,12 @@ function PreviewDetail({ id }: { id: number }) {
                 </div>
               )}
 
-              <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl bg-ink-900/60 p-4 ring-1 ring-white/5">
+              <div className="inset-panel mt-5 flex flex-wrap items-center gap-2 p-4">
                 <span className="mr-1 text-[13px] text-ink-600">Not in your library yet.</span>
                 <button
                   onClick={() => handleAdd("to_watch")}
                   disabled={adding}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong disabled:opacity-70"
+                  className="btn btn-primary btn-md"
                 >
                   <PlusIcon width={15} height={15} strokeWidth={2.5} />
                   Add to watchlist
@@ -716,7 +679,7 @@ function PreviewDetail({ id }: { id: number }) {
                 <button
                   onClick={() => handleAdd("watched")}
                   disabled={adding}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-400 disabled:opacity-70"
+                  className="btn btn-positive btn-md"
                 >
                   <CheckIcon width={15} height={15} strokeWidth={2.5} />
                   Mark as watched

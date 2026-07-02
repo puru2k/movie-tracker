@@ -7,6 +7,11 @@ const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
+  // For GitHub Pages the app is served from a sub-path (/movie-tracker/).
+  // Desktop (Tauri) and local dev serve from root, so default to "/".
+  // @ts-expect-error process is a nodejs global
+  base: process.env.BASE_PATH || "/",
+
   plugins: [react(), tailwindcss()],
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

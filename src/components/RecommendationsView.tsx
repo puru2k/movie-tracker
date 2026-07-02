@@ -66,10 +66,7 @@ export function RecommendationsView() {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
         <p className="text-[13px] text-ink-600">Add your TMDB API key to get recommendations.</p>
-        <button
-          onClick={openSettings}
-          className="rounded-md bg-brand px-3.5 py-1.5 text-[13px] font-medium text-white hover:bg-brand-strong"
-        >
+        <button onClick={openSettings} className="btn btn-primary btn-sm">
           Open Settings
         </button>
       </div>

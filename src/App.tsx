@@ -128,7 +128,7 @@ export default function App() {
           <span>Browsing as a guest — your library is saved on this device.</span>
           <button
             onClick={openSignIn}
-            className="rounded-md bg-brand px-2 py-0.5 text-[11px] font-medium text-white transition hover:bg-brand-strong"
+            className="rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-medium text-white transition hover:bg-brand-strong active:scale-95"
           >
             Sign in to sync
           </button>
@@ -200,7 +200,7 @@ export default function App() {
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Search your library"
-                className="w-56 rounded-md bg-white/[0.06] py-1.5 pl-8 pr-7 text-[13px] text-white outline-none ring-1 ring-white/[0.04] transition placeholder:text-ink-600 focus:w-64 focus:bg-white/[0.09] focus:ring-2 focus:ring-brand/70"
+                className="w-56 rounded-lg bg-white/[0.06] py-1.5 pl-8 pr-7 text-[13px] text-white outline-none ring-1 ring-white/[0.08] transition placeholder:text-ink-600 focus:w-64 focus:bg-white/[0.09] focus:ring-2 focus:ring-brand"
               />
               {filter && (
                 <button
@@ -213,12 +213,12 @@ export default function App() {
               )}
             </div>
 
-            <div className="inline-flex items-center rounded-md bg-white/[0.06] p-0.5 ring-1 ring-white/[0.04]">
+            <div className="inline-flex items-center rounded-lg bg-white/[0.06] p-0.5 ring-1 ring-white/[0.08]">
               <button
                 onClick={() => setLayout("grid")}
                 title="Grid view"
                 aria-label="Grid view"
-                className={`flex h-7 w-7 items-center justify-center rounded transition ${
+                className={`flex h-7 w-7 items-center justify-center rounded-md transition ${
                   layout === "grid" ? "bg-white/15 text-white" : "text-ink-600 hover:text-white"
                 }`}
               >
@@ -228,7 +228,7 @@ export default function App() {
                 onClick={() => setLayout("list")}
                 title="List view"
                 aria-label="List view"
-                className={`flex h-7 w-7 items-center justify-center rounded transition ${
+                className={`flex h-7 w-7 items-center justify-center rounded-md transition ${
                   layout === "list" ? "bg-white/15 text-white" : "text-ink-600 hover:text-white"
                 }`}
               >
@@ -242,7 +242,7 @@ export default function App() {
                 onChange={(e) => setGridSize(e.target.value as GridSize)}
                 title="Grid density"
                 aria-label="Grid density"
-                className="h-8 rounded-md bg-white/[0.06] px-2 text-[12px] text-white/85 outline-none ring-1 ring-white/[0.04] transition hover:bg-white/[0.09] focus:ring-2 focus:ring-brand/70 [color-scheme:dark]"
+                className="h-8 rounded-lg bg-white/[0.06] px-2 text-[12px] text-white/85 outline-none ring-1 ring-white/[0.08] transition hover:bg-white/[0.09] focus:ring-2 focus:ring-brand [color-scheme:dark]"
               >
                 <option value="small">Small</option>
                 <option value="medium">Medium</option>
@@ -254,7 +254,7 @@ export default function App() {
               onClick={openSearch}
               title="Add a movie"
               aria-label="Add a movie"
-              className="flex h-8 items-center gap-1.5 rounded-md bg-brand px-3 text-[13px] font-medium text-white shadow-sm transition hover:bg-brand-strong active:scale-[0.98]"
+              className="btn btn-primary btn-sm"
             >
               <PlusIcon width={15} height={15} strokeWidth={2.25} />
               Add
@@ -285,10 +285,7 @@ export default function App() {
               <p className="text-[13px] font-medium text-white/80">
                 No results for “{filter.trim()}”
               </p>
-              <button
-                onClick={() => setFilter("")}
-                className="rounded-md bg-white/[0.08] px-3.5 py-1.5 text-[13px] text-white/90 transition hover:bg-white/[0.12]"
-              >
+              <button onClick={() => setFilter("")} className="btn btn-secondary btn-sm">
                 Clear search
               </button>
             </div>
@@ -303,10 +300,7 @@ export default function App() {
                 </p>
                 <p className="mt-1 text-[12px] text-ink-600">{EMPTY_COPY[activeTab]}</p>
               </div>
-              <button
-                onClick={openSearch}
-                className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3.5 py-1.5 text-[13px] font-medium text-white transition hover:bg-brand-strong"
-              >
+              <button onClick={openSearch} className="btn btn-primary btn-sm">
                 <PlusIcon width={15} height={15} strokeWidth={2.25} />
                 Add a movie
               </button>

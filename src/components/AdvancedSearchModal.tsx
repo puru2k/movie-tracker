@@ -21,8 +21,7 @@ const SORTS: { value: SortBy; label: string }[] = [
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const field =
-  "w-full rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand [color-scheme:dark]";
+const field = "field";
 const labelCls = "mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-ink-600";
 
 export function AdvancedSearchModal() {
@@ -119,23 +118,14 @@ export function AdvancedSearchModal() {
   }
 
   return (
-    <div
-      className="animate-overlay-in fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm"
-      onMouseDown={onClose}
-    >
-      <div
-        className="animate-fade-in my-[4vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-ink-850 ring-1 ring-white/10"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+    <div className="overlay items-start justify-center overflow-y-auto" onMouseDown={onClose}>
+      <div className="modal my-[4vh] max-w-3xl" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-white/[0.08] px-6 py-4">
           <div>
             <h2 className="text-[16px] font-semibold text-white">Advanced search</h2>
             <p className="text-[12px] text-ink-600">Find films by genre, era, rating and more.</p>
           </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-white/[0.06] p-1.5 text-white/80 transition hover:bg-white/[0.12] hover:text-white"
-          >
+          <button onClick={onClose} className="btn btn-secondary h-8 w-8 shrink-0 p-0">
             <CloseIcon width={18} height={18} />
           </button>
         </div>
@@ -268,17 +258,11 @@ export function AdvancedSearchModal() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={runSearch}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3.5 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong"
-                >
+                <button onClick={runSearch} className="btn btn-primary btn-md">
                   <SearchIcon width={14} height={14} />
                   Search
                 </button>
-                <button
-                  onClick={reset}
-                  className="rounded-md bg-white/[0.06] px-3 py-2 text-[13px] text-white/80 transition hover:bg-white/[0.12]"
-                >
+                <button onClick={reset} className="btn btn-secondary btn-md">
                   Reset
                 </button>
               </div>

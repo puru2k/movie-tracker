@@ -109,20 +109,11 @@ export function SettingsModal() {
   const pct = progress && progress.total > 0 ? (progress.done / progress.total) * 100 : 0;
 
   return (
-    <div
-      className="animate-overlay-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-      onMouseDown={close}
-    >
-      <div
-        className="animate-fade-in w-full max-w-lg rounded-2xl bg-ink-850 p-6 ring-1 ring-white/10"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
+    <div className="overlay items-center justify-center" onMouseDown={close}>
+      <div className="modal max-w-lg p-6" onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[15px] font-semibold text-white">Settings</h2>
-          <button
-            onClick={close}
-            className="rounded-md p-1.5 text-ink-600 transition hover:bg-white/5 hover:text-white"
-          >
+          <button onClick={close} className="icon-btn p-1.5">
             <CloseIcon width={18} height={18} />
           </button>
         </div>
@@ -141,7 +132,7 @@ export function SettingsModal() {
                     close();
                     openSignIn();
                   }}
-                  className="rounded-lg bg-brand px-4 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong"
+                  className="btn btn-primary btn-md"
                 >
                   Sign in / Create account
                 </button>
@@ -152,10 +143,7 @@ export function SettingsModal() {
                   Signed in as <span className="text-white/80">{userEmail ?? "—"}</span>. Your
                   library is stored in your account and syncs across devices.
                 </p>
-                <button
-                  onClick={() => void signOut()}
-                  className="rounded-lg bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
-                >
+                <button onClick={() => void signOut()} className="btn btn-secondary btn-md">
                   Sign out
                 </button>
               </>
@@ -187,12 +175,12 @@ export function SettingsModal() {
                   setStatus("idle");
                 }}
                 placeholder="Paste your TMDB API key"
-                className="min-w-0 flex-1 rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand"
+                className="field min-w-0 flex-1"
               />
               <button
                 onClick={handleSave}
                 disabled={status === "checking"}
-                className="shrink-0 rounded-lg bg-brand px-4 py-2 text-[13px] font-medium text-white transition hover:bg-brand-strong disabled:opacity-60"
+                className="btn btn-primary btn-md shrink-0"
               >
                 {status === "checking" ? "Checking…" : "Save"}
               </button>
@@ -288,16 +276,10 @@ export function SettingsModal() {
           </div>
         ) : (
           <div className="flex gap-2">
-            <button
-              onClick={handleExport}
-              className="flex-1 rounded-lg bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
-            >
+            <button onClick={handleExport} className="btn btn-secondary btn-md flex-1">
               Export CSV
             </button>
-            <button
-              onClick={handleImport}
-              className="flex-1 rounded-lg bg-white/[0.06] px-4 py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
-            >
+            <button onClick={handleImport} className="btn btn-secondary btn-md flex-1">
               Import CSV
             </button>
           </div>
@@ -312,10 +294,7 @@ export function SettingsModal() {
         )}
 
         <div className="mt-6 flex justify-end">
-          <button
-            onClick={close}
-            className="rounded-lg px-4 py-2 text-[13px] text-ink-600 transition hover:bg-white/5 hover:text-white"
-          >
+          <button onClick={close} className="btn btn-ghost btn-md">
             Close
           </button>
         </div>

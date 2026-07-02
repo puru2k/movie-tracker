@@ -1,5 +1,7 @@
 # Movie Tracker
 
+**🎬 Live web app: [puru2k.github.io/movie-tracker](https://puru2k.github.io/movie-tracker/)** — no install, no sign-up required (browse as a guest, or create an account to sync across devices).
+
 A movie tracking app that runs two ways from one codebase:
 
 - **Desktop** (macOS, Windows, Linux) — Tauri v2 (Rust core) + React + TypeScript, with a local SQLite database so your library works fully offline.
@@ -94,6 +96,10 @@ Sign up with an email + password on first load; your library is then stored in y
 ### 4. Deploy
 
 `dist/` is a static bundle — host it anywhere (Vercel, Netlify, Cloudflare Pages, GitHub Pages). Set the three `VITE_*` variables in your host's environment and run `npm run build` there. No server to manage; Supabase is the backend.
+
+**This repo auto-deploys to GitHub Pages.** A push to `main` triggers [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which builds the web bundle and publishes it to <https://puru2k.github.io/movie-tracker/>. The three `VITE_*` values are stored as repository **Secrets** (Settings → Secrets and variables → Actions) and injected at build time; `BASE_PATH=/movie-tracker/` is set so assets resolve under the project sub-path.
+
+> If you fork this, add your own `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `VITE_TMDB_API_KEY` secrets, enable Pages (Settings → Pages → Source: **GitHub Actions**), and add your Pages URL to Supabase → **Authentication → URL Configuration** as a Site URL / redirect.
 
 ## Project structure
 

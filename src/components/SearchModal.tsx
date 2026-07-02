@@ -72,15 +72,12 @@ export function SearchModal() {
   }
 
   return (
-    <div
-      className="animate-overlay-in fixed inset-0 z-40 flex items-start justify-center bg-black/60 p-4 pt-[8vh] backdrop-blur-sm"
-      onMouseDown={close}
-    >
+    <div className="overlay items-start justify-center" onMouseDown={close}>
       <div
-        className="animate-fade-in flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-ink-850 ring-1 ring-white/10"
+        className="modal mt-[8vh] flex max-h-[80vh] max-w-2xl flex-col"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 border-b border-white/5 px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-white/[0.08] px-4 py-3">
           <SearchIcon width={20} height={20} className="text-ink-600" />
           <input
             autoFocus
@@ -89,10 +86,7 @@ export function SearchModal() {
             placeholder="Search for a movie…"
             className="flex-1 bg-transparent text-base text-white outline-none placeholder:text-ink-600"
           />
-          <button
-            onClick={close}
-            className="rounded-lg p-1.5 text-ink-600 transition hover:bg-white/5 hover:text-white"
-          >
+          <button onClick={close} className="icon-btn p-1.5">
             <CloseIcon width={18} height={18} />
           </button>
         </div>
@@ -103,10 +97,7 @@ export function SearchModal() {
               <p className="text-sm text-ink-600">
                 Add your free TMDB API key to search for movies.
               </p>
-              <button
-                onClick={openSettings}
-                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90"
-              >
+              <button onClick={openSettings} className="btn btn-primary btn-md">
                 Open Settings
               </button>
             </div>

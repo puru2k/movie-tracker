@@ -19,14 +19,9 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
       onClick={onClick}
       className="group flex flex-col text-left focus:outline-none"
     >
-      <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-ink-800 ring-1 ring-white/[0.06] transition duration-200 group-hover:ring-white/20 group-hover:shadow-lg group-hover:shadow-black/50 group-focus-visible:ring-2 group-focus-visible:ring-brand">
+      <div className="poster group-focus-visible:ring-2 group-focus-visible:ring-brand">
         {poster ? (
-          <img
-            src={poster}
-            alt={movie.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
-          />
+          <img src={poster} alt={movie.title} loading="lazy" />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-ink-600">
             <FilmIcon width={30} height={30} />
@@ -35,7 +30,7 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
         )}
 
         {movie.rating != null && (
-          <div className="absolute right-1.5 top-1.5 flex items-center gap-0.5 rounded-md bg-black/65 px-1.5 py-0.5 text-[11px] font-semibold text-accent backdrop-blur-sm">
+          <div className="badge-glass absolute right-1.5 top-1.5 text-accent">
             <StarIcon width={11} height={11} />
             {(movie.rating / 2).toFixed(1)}
           </div>
@@ -43,12 +38,12 @@ export function MovieCard({ movie, onClick }: MovieCardProps) {
 
         <div className="absolute left-1.5 top-1.5 flex flex-col items-start gap-1">
           {movie.favorite === 1 && (
-            <div className="rounded-md bg-black/65 p-1 text-rose-500 backdrop-blur-sm">
+            <div className="badge-glass p-1 text-rose-500">
               <HeartIcon width={11} height={11} fill="currentColor" />
             </div>
           )}
           {movie.rewatch_count > 0 && (
-            <div className="rounded-md bg-black/65 px-1.5 py-0.5 text-[10px] font-semibold text-white/90 backdrop-blur-sm">
+            <div className="badge-glass text-[10px] text-white/90">
               {movie.rewatch_count + 1}× seen
             </div>
           )}

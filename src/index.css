@@ -6,13 +6,21 @@
   --color-ink-900: #232325;
   --color-ink-850: #2a2a2d;
   --color-ink-800: #323236;
-  --color-ink-700: #3a3a3f;
+  --color-ink-750: #3a3a3f;
+  --color-ink-700: #48484d;
   --color-ink-600: #8e8e93;
+  --color-ink-500: #aeaeb2;
   /* System accents */
   --color-accent: #ffd60a;
   --color-accent-soft: #ffd60a29;
   --color-brand: #0a84ff;
-  --color-brand-strong: #0a7cff;
+  --color-brand-strong: #3b9bff;
+  /* Semantic */
+  --color-positive: #30d158;
+  --color-danger: #ff453a;
+
+  /* Motion */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
@@ -38,7 +46,151 @@ body {
   overflow: hidden;
 }
 
-/* Thin custom scrollbars */
+/* ---- Base polish -------------------------------------------------------- */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  label:has(> input[type="checkbox"]) {
+    cursor: pointer;
+  }
+
+  /* One consistent, on-brand focus ring for keyboard users everywhere. */
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-brand) 75%, transparent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  /* Inputs manage their own focus ring, so drop the outline there. */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-brand) 35%, transparent);
+    color: #fff;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+}
+
+/* ---- Design-system components ------------------------------------------ */
+@layer components {
+  /* Buttons: one base + intent + size modifiers */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-1.5 rounded-lg text-[13px]
+      font-medium leading-none transition duration-150 active:scale-[0.97]
+      disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-brand text-white shadow-sm hover:bg-brand-strong;
+  }
+  .btn-positive {
+    @apply bg-positive text-white shadow-sm hover:brightness-110;
+  }
+  .btn-secondary {
+    @apply bg-white/[0.07] text-white/90 ring-1 ring-inset ring-white/[0.08]
+      hover:bg-white/[0.12] hover:text-white;
+  }
+  .btn-ghost {
+    @apply text-ink-600 hover:bg-white/[0.06] hover:text-white;
+  }
+  .btn-danger {
+    @apply text-danger hover:bg-red-500/10;
+  }
+  .btn-xs {
+    @apply h-7 gap-1 px-2.5 text-[12px];
+  }
+  .btn-sm {
+    @apply h-8 px-3;
+  }
+  .btn-md {
+    @apply h-9 px-4;
+  }
+  .btn-lg {
+    @apply h-10 w-full px-4 text-[14px];
+  }
+  /* Square icon buttons */
+  .icon-btn {
+    @apply inline-flex items-center justify-center rounded-lg text-ink-600 transition
+      hover:bg-white/[0.08] hover:text-white active:scale-95;
+  }
+  /* Icon button that floats over media (poster/backdrop) */
+  .icon-btn-glass {
+    @apply inline-flex items-center justify-center rounded-lg bg-black/45 p-1.5 text-white/85
+      backdrop-blur transition hover:bg-black/65 hover:text-white active:scale-95;
+  }
+
+  /* Form controls */
+  .field {
+    @apply w-full rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none
+      ring-1 ring-white/[0.1] transition placeholder:text-ink-600
+      focus:ring-2 focus:ring-brand [color-scheme:dark];
+  }
+
+  /* Pills / chips */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px]
+      text-white/75 transition hover:bg-white/[0.12] hover:text-white;
+  }
+  .tag {
+    @apply inline-flex items-center rounded-full bg-white/[0.05] px-2 py-0.5 text-[11px] text-ink-500;
+  }
+  .tag-brand {
+    @apply inline-flex items-center rounded-full bg-brand/15 px-2 py-0.5 text-[11px] text-brand;
+  }
+  .badge-glass {
+    @apply inline-flex items-center gap-0.5 rounded-md bg-black/65 px-1.5 py-0.5 text-[11px]
+      font-semibold backdrop-blur-sm;
+  }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-2xl bg-ink-850 ring-1 ring-white/[0.08];
+  }
+  .inset-panel {
+    @apply rounded-xl bg-ink-900/60 ring-1 ring-white/[0.06];
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-ink-600;
+  }
+  .field-label {
+    @apply mb-2 text-[11px] font-medium uppercase tracking-wide text-ink-600;
+  }
+
+  /* Modals */
+  .overlay {
+    @apply fixed inset-0 z-50 flex bg-black/60 p-4 backdrop-blur-sm;
+    animation: overlayIn 0.15s ease-out both;
+  }
+  .modal {
+    @apply w-full overflow-hidden rounded-2xl bg-ink-850 shadow-2xl shadow-black/50
+      ring-1 ring-white/[0.1];
+    animation: modalIn 0.22s var(--ease-out-quint) both;
+  }
+
+  /* Poster tiles — one consistent, delightful hover across the app */
+  .poster {
+    @apply relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-ink-800 ring-1
+      ring-white/[0.06] transition duration-200;
+  }
+  .poster img {
+    @apply h-full w-full object-cover transition duration-300;
+  }
+  .group:hover .poster,
+  .group:focus-visible .poster {
+    @apply shadow-lg shadow-black/50 ring-white/25;
+  }
+  .group:hover .poster img {
+    transform: scale(1.04);
+  }
+}
+
+/* ---- Scrollbars --------------------------------------------------------- */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -57,6 +209,7 @@ body {
   background-clip: content-box;
 }
 
+/* ---- Animations --------------------------------------------------------- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -67,7 +220,6 @@ body {
     transform: translateY(0);
   }
 }
-
 .animate-fade-in {
   animation: fadeIn 0.18s ease-out both;
 }
@@ -82,4 +234,29 @@ body {
 }
 .animate-overlay-in {
   animation: overlayIn 0.15s ease-out both;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-modal-in {
+  animation: modalIn 0.22s var(--ease-out-quint) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

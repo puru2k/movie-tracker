@@ -47,10 +47,7 @@ export function AuthGate() {
             <code>VITE_SUPABASE_ANON_KEY</code> in your <code>.env</code> to enable accounts.
           </div>
         ) : (
-          <form
-            onSubmit={submit}
-            className="rounded-2xl bg-ink-850 p-5 ring-1 ring-white/10"
-          >
+          <form onSubmit={submit} className="card p-5">
             <label className="mb-1.5 block text-[12px] font-medium text-white/80">Email</label>
             <input
               type="email"
@@ -58,7 +55,7 @@ export function AuthGate() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="mb-3 w-full rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand placeholder:text-ink-600"
+              className="field mb-3"
             />
 
             <label className="mb-1.5 block text-[12px] font-medium text-white/80">Password</label>
@@ -68,18 +65,14 @@ export function AuthGate() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg bg-ink-950 px-3 py-2 text-[13px] text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-brand placeholder:text-ink-600"
+              className="field"
             />
 
             {authError && (
               <p className="mt-3 text-[12px] text-red-400">{authError}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={authBusy}
-              className="mt-4 w-full rounded-lg bg-brand py-2 text-[13px] font-semibold text-white transition hover:bg-brand-strong disabled:opacity-60"
-            >
+            <button type="submit" disabled={authBusy} className="btn btn-primary btn-lg mt-4">
               {authBusy
                 ? "Please wait…"
                 : mode === "signin"
@@ -108,7 +101,7 @@ export function AuthGate() {
         <button
           type="button"
           onClick={() => void continueAsGuest()}
-          className="mt-4 w-full rounded-lg bg-white/[0.06] py-2 text-[13px] font-medium text-white/90 transition hover:bg-white/[0.1]"
+          className="btn btn-secondary btn-lg mt-4"
         >
           Continue as guest
         </button>
