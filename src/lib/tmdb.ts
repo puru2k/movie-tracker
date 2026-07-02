@@ -181,6 +181,8 @@ export type SortBy =
 
 export interface AdvancedQuery {
   name?: string | null;
+  /** Cast or director name — resolved to a TMDB person and matched via with_people. */
+  person?: string | null;
   genreId?: number | null;
   yearFrom?: number | null;
   yearTo?: number | null;
@@ -188,6 +190,19 @@ export interface AdvancedQuery {
   maxRuntime?: number | null;
   language?: string | null;
   sortBy: SortBy;
+}
+
+/** Resolve a person's name to their most relevant TMDB id (cast or crew). */
+export async function findPersonId(name: string, apiKey: string): Promise<number | null> {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  const search = await request<RawPersonSearch>("/search/person", apiKey, {
+    query: trimmed,
+    include_adult: "false",
+    language: "en-US",
+    page: "1",
+  });
+  return search.results[0]?.id ?? null;
 }
 
 interface RawSearchItemFull {
@@ -255,6 +270,14 @@ export async function discoverSearch(
     page: "1",
     sort_by: q.sortBy,
   };
+  // Cast/director filter: resolve the name to a person id, then match films
+  // where they appear as cast or crew. If the name doesn't resolve, no results.
+  const person = q.person?.trim();
+  if (person) {
+    const personId = await findPersonId(person, apiKey);
+    if (!personId) return [];
+    params.with_people = String(personId);
+  }
   if (q.genreId) params.with_genres = String(q.genreId);
   if (q.yearFrom) params["primary_release_date.gte"] = `${q.yearFrom}-01-01`;
   if (q.yearTo) params["primary_release_date.lte"] = `${q.yearTo}-12-31`;

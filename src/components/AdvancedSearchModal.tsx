@@ -33,6 +33,7 @@ export function AdvancedSearchModal() {
   const presetGenreId = useAppStore((s) => s.advancedGenreId);
 
   const [name, setName] = useState<string>("");
+  const [person, setPerson] = useState<string>("");
   const [genreId, setGenreId] = useState<number | null>(presetGenreId);
   const [yearFrom, setYearFrom] = useState<string>("");
   const [yearTo, setYearTo] = useState<string>("");
@@ -52,6 +53,7 @@ export function AdvancedSearchModal() {
     if (presetGenreId != null) {
       setQuery({
         name: null,
+        person: null,
         genreId: presetGenreId,
         yearFrom: null,
         yearTo: null,
@@ -73,6 +75,7 @@ export function AdvancedSearchModal() {
   function runSearch() {
     setQuery({
       name: name.trim() || null,
+      person: person.trim() || null,
       genreId,
       yearFrom: yearFrom ? Number(yearFrom) : null,
       yearTo: yearTo ? Number(yearTo) : null,
@@ -85,6 +88,7 @@ export function AdvancedSearchModal() {
 
   function reset() {
     setName("");
+    setPerson("");
     setGenreId(null);
     setYearFrom("");
     setYearTo("");
@@ -123,7 +127,9 @@ export function AdvancedSearchModal() {
         <div className="flex items-center justify-between border-b border-white/[0.08] px-6 py-4">
           <div>
             <h2 className="text-[16px] font-semibold text-white">Advanced search</h2>
-            <p className="text-[12px] text-ink-600">Find films by genre, era, rating and more.</p>
+            <p className="text-[12px] text-ink-600">
+              Find films by title, cast or director, genre, era, rating and more.
+            </p>
           </div>
           <button onClick={onClose} className="btn btn-secondary h-8 w-8 shrink-0 p-0">
             <CloseIcon width={18} height={18} />
@@ -135,25 +141,52 @@ export function AdvancedSearchModal() {
             <p className="text-[13px] text-ink-600">Add your TMDB API key in Settings to search.</p>
           ) : (
             <>
-              <div>
-                <label className={labelCls}>Movie title</label>
-                <div className="relative">
-                  <SearchIcon
-                    width={14}
-                    height={14}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-600"
-                  />
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") runSearch();
-                    }}
-                    placeholder="Search by name, e.g. Blade Runner"
-                    className={`${field} pl-9 placeholder:text-ink-600`}
-                  />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelCls}>Movie title</label>
+                  <div className="relative">
+                    <SearchIcon
+                      width={14}
+                      height={14}
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-600"
+                    />
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") runSearch();
+                      }}
+                      placeholder="e.g. Blade Runner"
+                      className={`${field} pl-9 placeholder:text-ink-600`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Cast or director</label>
+                  <div className="relative">
+                    <SearchIcon
+                      width={14}
+                      height={14}
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-600"
+                    />
+                    <input
+                      value={person}
+                      onChange={(e) => setPerson(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") runSearch();
+                      }}
+                      placeholder="e.g. Christopher Nolan"
+                      className={`${field} pl-9 placeholder:text-ink-600`}
+                    />
+                  </div>
                 </div>
               </div>
+              {name.trim() && person.trim() && (
+                <p className="-mt-1 text-[11px] text-ink-600">
+                  Tip: title search takes priority. Clear the title to search by cast or director
+                  (and combine it with the filters below).
+                </p>
+              )}
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div>
@@ -277,7 +310,8 @@ export function AdvancedSearchModal() {
                     </p>
                   ) : (data?.length ?? 0) === 0 && isFetched ? (
                     <p className="text-[13px] text-ink-600">
-                      No films match those filters. Try loosening them.
+                      No films match. Double-check the spelling of a cast/director name, or loosen
+                      the filters.
                     </p>
                   ) : (
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-3">
